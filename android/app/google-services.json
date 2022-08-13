@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "423932015733",
+    "project_id": "y-lab-proj",
+    "storage_bucket": "y-lab-proj.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423932015733:android:b21806ac8c32d08178343c",
+        "android_client_info": {
+          "package_name": "com.example.ylab_demodemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "423932015733-0mnn1leqbctuabod8qq85vmtssu8g0db.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ylab_demodemo",
+            "certificate_hash": "b174aeeb4549ee1f155325a5b04c3582c74628ac"
+          }
+        },
+        {
+          "client_id": "423932015733-lbehhldn8gf9d2c4bnqnt8q1qvhn9kqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEI7KEPrYMfYGdDT7-w7LIgdhM7mxDD2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "423932015733-lbehhldn8gf9d2c4bnqnt8q1qvhn9kqq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "423932015733-6pjacmv17vpcstap7fjp1pb0413ukn9h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ylabDemo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
