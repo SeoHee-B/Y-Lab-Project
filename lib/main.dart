@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ylab_demodemo/screens/home_screen_basic.dart';
+import 'package:ylab_demodemo/screens/reservation_check.dart';
 import 'package:ylab_demodemo/screens/reservation_scroll.dart';
 import 'package:ylab_demodemo/screens/signin_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:ylab_demodemo/screens/signup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +32,14 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const reservation_scroll(),
+      /*initialRoute: 'SignInScreen',
+      routes: {
+        'SignInScrenn': (context) => SignInScreen(),
+        'SignUpScreen': (context) => SignUpScreen(),
+        'HomeScreen_basic': (context) => HomeScreen_basic(),
+        'reservation_scroll': (context) => reservation_scroll(),
+      },*/
+      home: const SignInScreen(),
     );
   }
 }

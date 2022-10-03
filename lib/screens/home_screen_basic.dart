@@ -11,6 +11,7 @@ import 'package:ylab_demodemo/utils/color_utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 var data1;
+var user_uid;
 
 class HomeScreen_basic extends StatefulWidget {
   const HomeScreen_basic({Key? key}) : super(key: key);
@@ -18,6 +19,8 @@ class HomeScreen_basic extends StatefulWidget {
   @override
   State<HomeScreen_basic> createState() => _HomeScreen_basicState();
 }
+
+var testpass;
 
 class _HomeScreen_basicState extends State<HomeScreen_basic> {
   @override
@@ -30,7 +33,7 @@ class _HomeScreen_basicState extends State<HomeScreen_basic> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           iconTheme: IconThemeData(
-            size: 30, //change size on your need
+            size: 25, //change size on your need
             color: Colors.black, //change color on your need
           ),
         ),
@@ -131,11 +134,12 @@ class _HomeScreen_basicState extends State<HomeScreen_basic> {
                                 //test pass 여부 확인해서 data1값에 넣음
                                 User? user =
                                     await FirebaseAuth.instance.currentUser;
+                                user_uid = user!.uid;
                                 String title = "";
                                 var collection = FirebaseFirestore.instance
                                     .collection('users');
                                 collection
-                                    .doc(user!.uid)
+                                    .doc(user_uid)
                                     .collection("data")
                                     .doc("data")
                                     .snapshots()
@@ -169,13 +173,14 @@ class _HomeScreen_basicState extends State<HomeScreen_basic> {
                                   print("not move");
                                   Scaffold.of(context).showSnackBar(SnackBar(
                                     content: Text(
-                                      "자격 시험에서 합격하시면\n실습실을 예약할 수 있습니다. ",
+                                      "자격 시험에서 합격하시면 실습실을 예약할 수 있습니다. ",
                                       style: TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 14,
                                           fontFamily: 'Nanum Gothic bold',
                                           color: Colors.black),
                                     ),
-                                    backgroundColor: Colors.transparent,
+                                    backgroundColor:
+                                        Color.fromARGB(30, 0, 0, 0),
                                     elevation: 0,
                                     duration: Duration(seconds: 2),
                                   ));

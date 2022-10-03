@@ -1,19 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ylab_demodemo/resusable_widget/reservation_check_data.dart';
 import 'package:ylab_demodemo/resusable_widget/reusable_widget.dart';
 import 'package:ylab_demodemo/resusable_widget/reservation_data.dart';
+import 'package:ylab_demodemo/screens/home_screen_basic.dart';
 import 'package:ylab_demodemo/screens/reservation.dart';
 import 'package:ylab_demodemo/utils/color_utils.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
-class reservation_scroll extends StatefulWidget {
-  const reservation_scroll({Key? key}) : super(key: key);
-
-  @override
-  State<reservation_scroll> createState() => _reservation_scrollState();
-}
 
 var lab_num = 0;
 var student_num;
@@ -21,7 +17,7 @@ var user_id;
 var phone;
 var name;
 var lab_numnum = 357;
-var tool_numnum = 0;
+var tool_numnum;
 var tool_name_fin;
 List<int> time_selected = [];
 List<String> tool_name = [];
@@ -31,6 +27,14 @@ Set<String> selected_time = {};
 Set<String> selected_date = {};
 int date = 0;
 int month = 0;
+var return_snackbar;
+
+class reservation_scroll extends StatefulWidget {
+  const reservation_scroll({Key? key}) : super(key: key);
+
+  @override
+  State<reservation_scroll> createState() => _reservation_scrollState();
+}
 
 class _reservation_scrollState extends State<reservation_scroll> {
   @override
@@ -41,10 +45,14 @@ class _reservation_scrollState extends State<reservation_scroll> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(
-          size: 30, //change size on your need
-          color: Colors.black, //change color on your need
-        ),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => HomeScreen_basic()));
+            },
+            icon: Icon(Icons.arrow_back_ios_new_rounded),
+            iconSize: 25,
+            color: Colors.black),
       ),
       //메인화면구현
       body: Stack(children: [
@@ -56,6 +64,7 @@ class _reservation_scrollState extends State<reservation_scroll> {
             color: hexStringToColor("F3F6F9"),
           ),
         ),
+        // 화면구성 시작
         SingleChildScrollView(
           child: Column(children: [
             //간격띄우기
@@ -73,7 +82,7 @@ class _reservation_scrollState extends State<reservation_scroll> {
               height: 7,
             ),
             //로고 밑 실선
-            Container(width: 222, height: 1, color: hexStringToColor("002753")),
+            Container(width: 222, height: 1, color: Colors.black),
             //간격띄우기
             SizedBox(
               height: 34,
@@ -134,7 +143,7 @@ class _reservation_scrollState extends State<reservation_scroll> {
                           tool.clear();
                           setState(() {});
                           print("$lab_num");
-                          print("$tool");
+                          print(lab_numnum);
                         },
                         child: Container(
                           margin: const EdgeInsets.only(right: 8),
@@ -233,24 +242,13 @@ class _reservation_scrollState extends State<reservation_scroll> {
                             SizedBox(
                               height: 22,
                             ),
-                            if (lab_num == 0)
-                              Text(first_tool[index],
-                                  style: TextStyle(
-                                      fontFamily: 'NotoSansKR Medium',
-                                      fontSize: 16,
-                                      color: tool_text_color[index]))
-                            else if (lab_num == 1)
-                              Text(second_tool[index],
-                                  style: TextStyle(
-                                      fontFamily: 'NotoSansKR Medium',
-                                      fontSize: 16,
-                                      color: tool_text_color[index]))
-                            else
-                              Text(third_tool[index],
-                                  style: TextStyle(
-                                      fontFamily: 'NotoSansKR Medium',
-                                      fontSize: 16,
-                                      color: tool_text_color[index]))
+                            Text(
+                              tools[lab_num][index],
+                              style: TextStyle(
+                                  fontFamily: 'NotoSansKR Medium',
+                                  fontSize: 16,
+                                  color: tool_text_color[index]),
+                            )
                           ]),
                         ),
                       ),
@@ -461,6 +459,7 @@ class _reservation_scrollState extends State<reservation_scroll> {
                     );
                   }),
             ),
+
             //패딩
             SizedBox(
               height: 32,
@@ -469,116 +468,132 @@ class _reservation_scrollState extends State<reservation_scroll> {
             //제출하기 버튼
 
             submit_Button(context, () async {
-              //사용장비이름 데이터 넣기
-
-              switch (lab_num) {
-                case 0:
-                  var i = 0;
-                  while (i < 4) {
-                    if (tool.contains('$i')) {
-                      var name = first_tool[i];
-                      tool_name.add(name);
-                    }
-                    i++;
-                  }
-                  break;
-                case 1:
-                  var i = 0;
-                  while (i < 4) {
-                    if (tool.contains('$i')) {
-                      var name = second_tool[i];
-                      tool_name.add(name);
-                    }
-                    i++;
-                  }
-                  break;
-                case 2:
-                  var i = 0;
-                  while (i < 4) {
-                    if (tool.contains('$i')) {
-                      var name = third_tool[i];
-                      tool_name.add(name);
-                    }
-                    i++;
-                  }
-                  break;
-              }
-              print(lab_numnum);
-              print(tool_name);
-
-              //예약일 데이터
-              //월 - month, 일 - date
-              print(month);
-              print(date);
-
-              //시간 데이터 부르기
-              selected_time.forEach((element) {
-                int temp = int.parse('$element');
-                time_selected.add(temp + 9);
-              });
-              print(time_selected);
-
-              User? user = await FirebaseAuth.instance.currentUser;
-              user_id = user!.uid;
-              var collection = FirebaseFirestore.instance.collection('users');
-              collection
-                  .doc(user.uid)
-                  .collection('data')
-                  .doc('data')
-                  .snapshots()
-                  .listen((docSnapshot) {
-                if (docSnapshot.exists) {
-                  Map<String, dynamic> data = docSnapshot.data()!;
-
-                  // You can then retrieve the value from the Map like this:
-                  student_num = data['studentnumber'];
-                  name = data['name'];
-                  phone = data['phonenumber'];
-                }
-              });
-              print(student_num);
-              print(name);
-              print(phone);
-
-              for (int i = 0; i < tool_name.length; i++) {
-                if (i == 0) {
-                  tool_name_fin = tool_name[i];
-                } else {
-                  var gap = ", ";
-                  tool_name_fin = tool_name_fin + gap + tool_name[i];
-                }
-              }
-              print("tool name fin = $tool_name_fin");
-              var temp_time = time_selected[0];
-              print("temptime: $temp_time");
-              //예약 데이터 생성하기
-              //데이터 있는지 확인
-              final booking_state = FirebaseFirestore.instance
-                  .collection('booking')
-                  .doc("$lab_numnum")
-                  .collection("$month")
-                  .doc("$date")
-                  .collection('$temp_time');
-              var book_true = await booking_state.doc('true').get();
-              var book_false = await booking_state.doc('false').get();
-              if (book_true.exists) {
-                // true로 예약이 있을때
-                print(1);
+              if (selected_date.isEmpty ||
+                  selected_time.isEmpty ||
+                  tool.isEmpty) {
+                print("not move");
               } else {
-                //true로 예약이 없을때
-                if (book_false.exists) {
-                  //true 는 없고, false는 존재
-                  //false를  true로 변경해야함
-                  print(2);
-                  makedata_false_to_true(lab_numnum, month, date, temp_time,
-                      user_id, student_num, name, phone, tool_name_fin);
+                //사용장비이름 데이터 넣기
+                var i = 0;
+                while (i < 4) {
+                  if (tool.contains('$i')) {
+                    tool_name.add(tools[lab_num][i]);
+                  }
+                  i++;
+                }
+                print(lab_numnum);
+                print(tool_name);
+                //예약일 데이터
+                //월 - month, 일 - date
+                print(selected_date);
+                //시간 데이터 부르기
+                selected_time.forEach((element) {
+                  int temp = int.parse('$element');
+                  time_selected.add(temp + 9);
+                });
+                print(time_selected);
+                print(user_uid);
+
+                for (int i = 0; i < tool_name.length; i++) {
+                  if (i == 0) {
+                    tool_name_fin = tool_name[i];
+                  } else {
+                    var gap = ", ";
+                    tool_name_fin = tool_name_fin + gap + tool_name[i];
+                  }
+                }
+                print("tool name fin = $tool_name_fin");
+                var temp_time = time_selected[0];
+                print("temptime: $temp_time");
+
+                //예약 데이터 생성하기
+                //데이터 있는지 확인
+
+                final exist_check = await FirebaseFirestore.instance
+                    .collection('booking')
+                    .doc("$lab_numnum")
+                    .collection("$month")
+                    .doc('$date')
+                    .collection('$temp_time')
+                    .doc('$temp_time')
+                    .get();
+
+                FirebaseFirestore.instance
+                    .collection('booking')
+                    .doc('$lab_numnum')
+                    .collection('$month')
+                    .doc('$date')
+                    .collection('$temp_time')
+                    .doc('$temp_time')
+                    .get()
+                    .then(((value) {
+                  if (value.exists) {
+                    print("exist");
+                    if (value['status'] == true) {
+                      // true로 예약이 있을때
+                      print('1');
+                    } else {
+                      //true 는 없고, false는 존재
+                      //false를  true로 변경해야함b
+                      print('2');
+                      makedata_false_to_true_other(lab_numnum, month, date,
+                          temp_time, user_uid, tool_name_fin);
+                    }
+                  } else {
+                    //true 는 없고, false는 존재
+                    //false를  true로 변경해야함b
+                    print('2');
+                    makedata_false_to_true_other(lab_numnum, month, date,
+                        temp_time, user_uid, tool_name_fin);
+                    print("not exist");
+                  }
+                }));
+/*
+                if (exist_check.data() == {}) {
+                  FirebaseFirestore.instance
+                      .collection('booking')
+                      .doc("$lab_numnum")
+                      .collection("$month")
+                      .doc('$date')
+                      .collection('$temp_time')
+                      .doc('$temp_time')
+                      .snapshots()
+                      .listen((docSnapshot) {
+                    if (docSnapshot.exists) {
+                      Map<String, dynamic> data = docSnapshot.data()!;
+                      // You can then retrieve the value from the Map like this:
+                      if (data['status'] == true) {
+                        // true로 예약이 있을때
+                        print('1');
+                      } else {
+                        //true 는 없고, false는 존재
+                        //false를  true로 변경해야함b
+                        print('2');
+                        makedata_false_to_true_other(lab_numnum, month, date,
+                            temp_time, user_uid, tool_name_fin);
+                      }
+                    }
+                  });
                 } else {
                   //true와 false 모두 없음
                   //새로운 false 데이터를 만들어야함.
-                  print(3);
-                  makedata_false(lab_numnum, month, date, temp_time, user_id,
-                      student_num, name, phone, tool_name_fin);
-                }
+                  print('3');
+                  makedata_false_other(lab_numnum, month, date, temp_time,
+                      user_uid, tool_name_fin);
+                }*/
+
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomeScreen_basic()));
+
+                time_selected.clear();
+                print(time_selected);
+                tool_name.clear();
+                selected.clear();
+                tool.clear();
+                selected_time.clear();
+                selected_date.clear();
               }
             })
           ]),

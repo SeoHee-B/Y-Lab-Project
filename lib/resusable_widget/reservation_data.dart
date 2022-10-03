@@ -81,25 +81,14 @@ var tool_text_color = [
 ];
 
 ///
-///
-
-// 357 사용가능 장비
-var first_tool = ["열선커터기", "샌딩 부스", "스프레이부스", "기기사용없음"];
-
-// 457 사용가능 장비
-var second_tool = [
-  "드릴프레스",
-  "띠톱(밴드쏘)",
-  "진공성형기",
-  "기기사용없음",
-];
-
-// 359 사용가능 장비
-var third_tool = [
-  "촬영용 조명",
-  "공유용 모니터",
-  "인간공학실습도구",
-  "기기사용없음",
+///이중배열 장비
+var tools = [
+  // 357 사용가능 장비
+  ["열선커터기", "샌딩 부스", "스프레이부스", "기기사용없음"],
+  // 457 사용가능 장비
+  ["드릴프레스", "띠톱(밴드쏘)", "진공성형기", "기기사용없음"],
+  // 359 사용가능 장비
+  ["촬영용 조명", "공유용 모니터", "인간공학실습도구", "기기사용없음"]
 ];
 
 var date_color = [
@@ -333,6 +322,116 @@ void makedata_false(int lab_numnum, int month, int date, int time, String uid,
       .set({"tool": tool});
 }
 
+void makedata_false_other(
+    int lab_numnum, int month, int date, int time, String uid, String tool) {
+  //새로운 false데이터 생성
+  FirebaseFirestore.instance
+      .collection('booking')
+      .doc('$lab_numnum')
+      .collection('$month')
+      .doc('$date')
+      .collection('$time')
+      .doc('$time')
+      .set({
+    "status": false,
+    "date": "$month/$date",
+    "time": time,
+    "tool": tool,
+    "students": [uid],
+  });
+  print('false step 1');
+
+  //신청자 개인정보에 false데이터 생성
+  FirebaseFirestore.instance
+      .collection('users')
+      .doc('$uid')
+      .collection('reservation')
+      .doc('$month')
+      .collection('$date')
+      .doc('$time')
+      .set({
+    "status": false,
+    "date": "$month/$date",
+    "time": time,
+    "tool": tool,
+    "lab num": lab_numnum
+  });
+
+  print('false step 2');
+}
+
+void makedata_false_to_true_other(int lab_numnum, int month, int date, int time,
+    String uid, String tool) async {
+  final dataRef = FirebaseFirestore.instance
+      .collection('booking')
+      .doc('$lab_numnum')
+      .collection('$month')
+      .doc('$date')
+      .collection('$time')
+      .doc('$time');
+
+  //false데이터에 있는 학생 데이터 받아오기
+  //학생들 uid 모으는 list선언
+  List<dynamic> pastStudents = [];
+  //list에 학생들 데이터 넣기
+  dataRef.snapshots().listen((docSnapshot) {
+    if (docSnapshot.exists) {
+      Map<String, dynamic> data = docSnapshot.data()!;
+
+      // You can then retrieve the value from the Map like this:
+      pastStudents.add(data['students']);
+      print(pastStudents);
+    }
+  });
+
+  print('falsetotrue step 1');
+
+  if (pastStudents.contains(uid)) {
+    print('예약한 기록이 있습니다.');
+    return_snackbar = '예약한 기록이 있습니다.';
+  } else {
+    print(pastStudents);
+    //기존 데이터 true로 변경
+    dataRef.update({"status": true});
+
+    //false데이터에 있는 학생 개인정보 true로 변경
+    pastStudents.forEach((element) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc('$element')
+          .collection('reservation')
+          .doc('$month')
+          .collection('$date')
+          .doc('$time')
+          .set({"status": true});
+    });
+    print('falsetotrue step 2');
+
+    // 학생 데이터 추가
+    dataRef.update({
+      "student": FieldValue.arrayUnion([uid])
+    });
+    print('falsetotrue step 3');
+
+    //신청자 개인정보에 true데이터 생성
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc('$uid')
+        .collection('reservation')
+        .doc('$month')
+        .collection('$date')
+        .doc('$time')
+        .set({
+      "status": true,
+      "date": "$month/$date",
+      "time": time,
+      "tool": tool,
+      "lab num": lab_numnum
+    });
+    print('falsetotrue step 4');
+  }
+}
+
 void makedata_false_to_true(
     int lab_numnum,
     int month,
@@ -343,7 +442,6 @@ void makedata_false_to_true(
     String name,
     String phonenum,
     String tool) async {
-      
   //기존 false 데이터에 들어있는 내용 저장
   var collection = FirebaseFirestore.instance
       .collection('booking')
@@ -356,7 +454,6 @@ void makedata_false_to_true(
   var uidid = datas.data().toString().contains('uid') ? datas.get('uid') : '';
   print(uidid);
 
-  /*
   collection.doc('false').get().then(
     (value) {
       uidid = value['uid'];
@@ -390,8 +487,7 @@ void makedata_false_to_true(
           .doc('$lab_numnum')
           .set({"tool": value['tool']});
     },
-  );*/
-
+  );
   ////기존 false데이터 삭제
   FirebaseFirestore.instance
       .collection('booking')
@@ -410,7 +506,7 @@ void makedata_false_to_true(
       .doc('$date')
       .collection('$time')
       .doc('true')
-      .collection('$uid')
+      .collection('$uidid')
       .doc('data')
       .set({
     "uid": uid,
@@ -423,7 +519,7 @@ void makedata_false_to_true(
   //신청자 개인정보에 true 데이터 생성
   FirebaseFirestore.instance
       .collection('users')
-      .doc('$uid')
+      .doc('$uidid')
       .collection('reservation')
       .doc('true')
       .collection('$month')
